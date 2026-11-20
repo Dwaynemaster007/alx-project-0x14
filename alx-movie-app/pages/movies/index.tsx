@@ -2,7 +2,7 @@ import Button from "@/components/commons/Button";
 import Loading from "@/components/commons/Loading";
 import MovieCard from "@/components/commons/MovieCard";
 import { MoviesProps } from "@/interfaces";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 const GENRES = ["All", "Animation", "Comedy", "Fantasy"];
 const THIS_YEAR = new Date().getFullYear();
@@ -13,35 +13,40 @@ const Movies: React.FC = () => {
   const [year, setYear] = useState<number | null>(null);
   const [genre, setGenre] = useState<string>("All");
   const [search, setSearch] = useState<string>("");
-  const [movies, setMovies] = useState<MoviesProps[]>([]);
-  const [hasNext, setHasNext] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState<{
+    key: string;
+    movies: MoviesProps[];
+    hasNext: boolean;
+    error: string | null;
+  } | null>(null);
 
-  const fetchMovies = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetch("/api/fetch-movies", {
-        method: "POST",
-        body: JSON.stringify({ page, year, genre: genre === "All" ? "" : genre }),
-        headers: { "Content-Type": "application/json; charset=utf-8" },
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Something went wrong");
-      setMovies(data.movies);
-      setHasNext(data.hasNext);
-    } catch (err) {
-      setMovies([]);
-      setError((err as Error).message);
-    } finally {
-      setLoading(false);
-    }
-  }, [page, year, genre]);
+  // Each combination of filters is one request; we're loading until its result arrives
+  const requestKey = `${page}|${year ?? ""}|${genre}`;
+  const loading = result?.key !== requestKey;
+  const movies = result?.movies ?? [];
+  const hasNext = result?.hasNext ?? false;
+  const error = result?.error ?? null;
 
   useEffect(() => {
-    fetchMovies();
-  }, [fetchMovies]);
+    let cancelled = false;
+    (async () => {
+      try {
+        const response = await fetch("/api/fetch-movies", {
+          method: "POST",
+          body: JSON.stringify({ page, year, genre: genre === "All" ? "" : genre }),
+          headers: { "Content-Type": "application/json; charset=utf-8" },
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Something went wrong");
+        if (!cancelled) setResult({ key: requestKey, movies: data.movies, hasNext: data.hasNext, error: null });
+      } catch (err) {
+        if (!cancelled) setResult({ key: requestKey, movies: [], hasNext: false, error: (err as Error).message });
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [requestKey, page, year, genre]);
 
   // The API has no text search, so filter the current page by title
   const visible = movies.filter((movie) =>
