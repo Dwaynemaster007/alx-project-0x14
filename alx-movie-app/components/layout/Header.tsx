@@ -1,13 +1,14 @@
+import Link from "next/link";
 import React from "react";
 
 const Header: React.FC = () => {
   return (
     <header className="bg-gray-900 text-white py-4">
       <div className="container mx-auto flex justify-between items-center px-4">
-        <h1 className="text-xl font-bold">CineSeek</h1>
+        <Link href="/" className="text-xl font-bold">CineSeek</Link>
         <nav className="space-x-6">
-          <a href="/" className="hover:text-blue-400">Home</a>
-          <a href="/movies" className="hover:text-blue-400">Movies</a>
+          <Link href="/" className="hover:text-[#E2D609]">Home</Link>
+          <Link href="/movies" className="hover:text-[#E2D609]">Movies</Link>
         </nav>
       </div>
     </header>

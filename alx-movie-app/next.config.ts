@@ -2,13 +2,14 @@ import withPWAInit from "@ducanh2912/next-pwa";
 import type { NextConfig } from "next";
 
 const withPWA = withPWAInit({
-  dest: "public", // service worker & manifest will be generated here
+  dest: "public", // the service worker is generated here on each build
+  disable: process.env.NODE_ENV === "development",
 });
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ["m.media-amazon.com"],
+    remotePatterns: [{ protocol: "https", hostname: "m.media-amazon.com" }],
   },
 };
 

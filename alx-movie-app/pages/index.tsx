@@ -6,13 +6,13 @@ const Home: React.FC = () => {
   return (
     <div className="bg-[#171D22] text-white">
       <section
-        className="h-screen bg-cover bg-center"
+        className="min-h-[80vh] bg-cover bg-center"
         style={{
           backgroundImage:
             'url("https://themebeyond.com/html/movflx/img/bg/breadcrumb_bg.jpg")',
         }}
       >
-        <div className="bg-black bg-opacity-50 h-full flex flex-col justify-center items-center text-center">
+        <div className="bg-black/50 min-h-[80vh] px-4 flex flex-col justify-center items-center text-center">
           <h1 className="text-5xl md:text-7xl font-bold mb-8">
             Discover Your Next Favorite{" "}
             <span className="text-[#E2D609]">Movie</span>
@@ -23,7 +23,7 @@ const Home: React.FC = () => {
           </p>
           <Button
             title="Browse Movies"
-            action={() => router.push("/movies", undefined, { shallow: false })}
+            onClick={() => router.push("/movies", undefined, { shallow: false })}
           />
         </div>
       </section>
@@ -36,7 +36,7 @@ const Home: React.FC = () => {
           Sign up today to get access to the latest movies, exclusive content,
           and personalized movie recommendations.
         </p>
-        <Button title="Get Started" />
+        <Button title="Get Started" onClick={() => router.push("/movies")} />
       </section>
     </div>
   );
